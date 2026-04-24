@@ -1,0 +1,59 @@
+# ============================================
+# Общее
+# ============================================
+.DS_Store
+*.log
+*.local
+.env
+.env.local
+.env.*.local
+
+# Редакторы
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============================================
+# Frontend (Vue + Vite)
+# ============================================
+frontend/node_modules
+frontend/dist
+frontend/dist-ssr
+frontend/.vite
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Vite cache (если случайно попала в корень)
+.vite/
+node_modules/
+
+# ============================================
+# Backend (Go)
+# ============================================
+# Скомпилированный бинарник
+backend/backend
+backend/*.exe
+backend/*.dll
+backend/*.so
+backend/*.dylib
+
+# Тестовые бинарники
+backend/*.test
+backend/*.out
+
+# Go build cache
+backend/vendor/
+
+# SQLite база данных и WAL/SHM файлы (не коммитим локальные данные)
+backend/judge.db
+backend/judge.db-shm
+backend/judge.db-wal
+backend/*.db
+backend/*.db-journal
