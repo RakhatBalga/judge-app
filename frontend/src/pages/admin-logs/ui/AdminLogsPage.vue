@@ -153,39 +153,64 @@ onMounted(load)
         <div
           v-for="log in filtered"
           :key="log.id"
-          class="px-5 py-3 flex items-start gap-3 hover:bg-slate-50/50 transition"
+          class="px-3.5 py-2 flex items-start gap-2 hover:bg-slate-50/50 transition"
         >
-          <div class="text-xs text-slate-400 font-mono min-w-[70px] pt-0.5 shrink-0">
+          <div class="text-[10px] text-slate-400 font-mono min-w-[56px] pt-0.5 shrink-0 leading-tight">
             {{ fmtHHmm(log.timestamp) }}
-            <div class="text-[10px] text-slate-300">{{ fmtTime(log.timestamp).split(',')[0] }}</div>
+            <div class="text-[9px] text-slate-300">{{ fmtTime(log.timestamp).split(',')[0] }}</div>
           </div>
 
-          <div class="w-2 h-2 rounded-full mt-2 shrink-0" :class="log.oldValue === null ? 'bg-emerald-400' : 'bg-sky-400'" />
+          <div
+            class="w-1.5 h-1.5 rounded-full mt-1 shrink-0"
+            :class="log.oldValue === null ? 'bg-emerald-400' : 'bg-sky-400'"
+          />
 
-          <div class="flex-1 min-w-0 text-sm leading-relaxed">
-            <span class="text-slate-500 wrap-anywhere">
-              <span class="font-semibold text-slate-800">{{ log.fullName }}</span>
-              {{ log.oldValue === null ? t('logs.actionSet') : t('logs.actionChanged') }}
-              <span class="font-semibold text-slate-700">{{ criterionLabel[log.field] || log.field }}</span>
-              {{ t('logs.forProject') }}
-              <span class="inline-block min-w-0 max-w-full text-slate-800" :title="log.teamName">
-                <TeamBilingualName :name="log.teamName" variant="inline" />
-              </span>
-            </span>
-            <span class="ml-1 inline-flex items-center gap-1 text-xs font-mono flex-wrap">
-              <span v-if="log.oldValue !== null" class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 line-through">
-                {{ log.oldValue }}
-              </span>
-              <span v-if="log.oldValue !== null" class="text-slate-300">→</span>
-              <span class="px-1.5 py-0.5 rounded bg-[#28ca9e]/10 text-[#1a8c6d] font-semibold">
-                {{ log.newValue }}
-              </span>
-            </span>
+          <div class="flex-1 min-w-0 flex flex-col gap-1 text-xs">
+            <div class="font-semibold text-slate-900 leading-tight">
+              {{ log.fullName }}
+            </div>
+            <div class="space-y-1 border-l border-slate-200 ml-0.5 pl-2">
+              <p class="text-slate-600 leading-tight text-[11px]">
+                <span class="text-slate-500">
+                  {{ log.oldValue === null ? t('logs.actionSet') : t('logs.actionChanged') }}
+                </span>
+                <span class="font-semibold text-slate-800">
+                  {{ criterionLabel[log.field] || log.field }}
+                </span>
+              </p>
+              <div class="min-w-0 log-compact-project">
+                <div class="text-[9px] font-medium text-slate-400 mb-0.5">
+                  {{ t('logs.forProject') }}
+                </div>
+                <div class="text-slate-800" :title="log.teamName">
+                  <TeamBilingualName :name="log.teamName" variant="card" />
+                </div>
+              </div>
+              <div class="inline-flex items-center gap-1 text-[10px] font-mono flex-wrap">
+                <span
+                  v-if="log.oldValue !== null"
+                  class="px-1 py-px rounded bg-slate-100 text-slate-600 line-through"
+                >
+                  {{ log.oldValue }}
+                </span>
+                <span v-if="log.oldValue !== null" class="text-slate-300">→</span>
+                <span class="px-1 py-px rounded bg-[#28ca9e]/10 text-[#1a8c6d] font-semibold">
+                  {{ log.newValue }}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div class="text-[10px] text-slate-300 font-mono shrink-0">#{{ log.id }}</div>
+          <div class="text-[9px] text-slate-300 font-mono shrink-0 pt-0.5">#{{ log.id }}</div>
         </div>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.log-compact-project :deep(span span) {
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+</style>

@@ -95,6 +95,7 @@
     "exportTitle": "Судьялаудың жиынтық хаттамасы",
     "exportDate": "Күн",
     "exportJudgesInDb": "Дерекқордағы судьялар",
+    "exportTableSortHint": "Сұрыптау: Microsoft Excel-та кесте тақырыбында автофильтр (▼) — мысалы «ИТОГО» бағанын кему бойынша. Apple Numbers: бағана бойынша сұрыптау.",
     "juryList": "Қазылар алқасы",
     "viewAs": "Көрініс",
     "viewAverage": "Орташа (барлық судьялар)",

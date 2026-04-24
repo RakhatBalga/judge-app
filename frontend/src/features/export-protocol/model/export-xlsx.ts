@@ -268,6 +268,16 @@ function buildSummarySheet(wb: ExcelJS.Workbook, data: ProtocolResponse, judgeSc
   widths.push({ width: 16 })
   ws.columns = widths
 
+  // Microsoft Excel: автофильтр по шапке — в заголовке колонок появляются «▼»;
+  // в Excel — «Сортировка и фильтр» → по убыванию для «ИТОГО» и т.д. (как в приложении, но порядок меняет пользователь)
+  if (summary.length > 0) {
+    const lastDataRow = HEADER_ROW + summary.length
+    ws.autoFilter = {
+      from: { row: HEADER_ROW, column: 1 },
+      to: { row: lastDataRow, column: totalCols },
+    }
+  }
+
   // Signatures
   const signStart = startRow + summary.length + 3
   ws.mergeCells(signStart, 1, signStart, totalCols)

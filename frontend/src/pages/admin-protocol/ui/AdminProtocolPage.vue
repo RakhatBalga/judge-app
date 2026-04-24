@@ -47,7 +47,7 @@ async function doExport() {
   try {
     await exportProtocolToXlsx(protocolData.value, judgeScoresData.value, {
       title: t('protocol.exportTitle'),
-      subtitle: `${t('protocol.exportDate')}: ${new Date().toLocaleString()} · ${t('protocol.exportJudgesInDb')}: ${protocolData.value.totalJudges}`,
+      subtitle: `${t('protocol.exportDate')}: ${new Date().toLocaleString()} · ${t('protocol.exportJudgesInDb')}: ${protocolData.value.totalJudges} · ${t('protocol.exportTableSortHint')}`,
       criteriaLabels: criteriaList.value.map(c => c.label) as [string, string, string, string, string],
       awardLabels: {
         header: t('protocol.award'),

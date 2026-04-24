@@ -95,6 +95,7 @@
     "exportTitle": "Judging Summary Protocol",
     "exportDate": "Date",
     "exportJudgesInDb": "Judges in database",
+    "exportTableSortHint": "Sort: the table has AutoFilter in Excel (▼ in the header row — e.g. sort «Total» Z→A). In Apple Numbers, use the column menu / Organize to sort.",
     "juryList": "Jury members",
     "viewAs": "View",
     "viewAverage": "Average (all judges)",
