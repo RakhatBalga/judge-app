@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ApiTeam } from '@shared/api'
 import { getScoreColor } from '@shared/utils/score-colors'
+import { TeamBilingualName } from '@shared/ui'
 import { useI18n } from '@shared/i18n/useI18n'
 
 defineProps<{
@@ -21,11 +22,11 @@ const { t } = useI18n()
   >
     <span class="text-sm text-slate-400 font-mono w-7 shrink-0 text-right">#{{ rank }}</span>
 
-    <span class="flex-1 font-semibold text-slate-800 text-sm leading-snug flex items-center gap-2">
-      {{ team.name }}
+    <span class="flex-1 min-w-0 font-semibold text-slate-800 text-sm leading-snug flex items-start gap-2 flex-wrap">
+      <TeamBilingualName :name="team.name" variant="card" />
       <span
         v-if="team.status === 'absent'"
-        class="text-[10px] font-semibold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5"
+        class="shrink-0 text-[10px] font-semibold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5"
       >
         {{ t('teams.absent') }}
       </span>

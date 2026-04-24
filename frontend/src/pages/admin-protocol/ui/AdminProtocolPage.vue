@@ -5,7 +5,7 @@ import {
   type ProtocolResponse, type JudgeScoresEntry,
 } from '@shared/api'
 import { exportProtocolToXlsx } from '@features/export-protocol'
-import { ProfileMenu, AppButton } from '@shared/ui'
+import { ProfileMenu, AppButton, TeamBilingualName } from '@shared/ui'
 import { useI18n } from '@shared/i18n/useI18n'
 import { CRITERIA_KEYS } from '@shared/config/scoring'
 import logoImg from '@shared/assets/logo.png'
@@ -180,10 +180,7 @@ const sortedSummaryRows = computed<SummaryRow[]>(() => {
 
 const sortedJudgeRows = computed(() => {
   if (!selectedJudgeEntry.value) return []
-  return [...selectedJudgeEntry.value.scores].sort((a, b) => {
-    if (a.total !== b.total) return b.total - a.total
-    return a.teamId - b.teamId
-  })
+  return [...selectedJudgeEntry.value.scores].sort((a, b) => a.teamId - b.teamId)
 })
 
 function selectJudge(judgeId: number) {
@@ -293,7 +290,7 @@ onMounted(load)
             <thead class="bg-slate-50 text-slate-600 sticky top-0">
               <tr>
                 <th class="px-3 py-2 text-left font-semibold border border-slate-200 w-12">№</th>
-                <th class="px-3 py-2 text-left font-semibold border border-slate-200 min-w-[220px]">
+                <th class="px-3 py-2 text-left font-semibold border border-slate-200 min-w-[220px] max-w-[min(520px,45vw)]">
                   {{ t('protocol.team') }}
                 </th>
                 <th
@@ -323,13 +320,13 @@ onMounted(load)
                 :class="row.status === 'absent' ? 'bg-[#FFF4B8]/60' : (i % 2 === 1 ? 'bg-slate-50/40' : '')"
               >
                 <td class="px-3 py-2 text-slate-400 font-mono text-xs border border-slate-200">{{ i + 1 }}</td>
-                <td class="px-3 py-2 font-semibold text-slate-800 border border-slate-200">
-                  <span class="inline-flex items-center gap-2">
-                    {{ row.teamName }}
-                    <span v-if="row.status === 'absent'" class="text-[10px] font-semibold text-amber-700 bg-amber-200/60 rounded-full px-1.5 py-0.5">
+                <td class="px-3 py-2 text-slate-800 border border-slate-200 max-w-[min(520px,45vw)] align-top" :title="row.teamName">
+                  <div class="flex items-start gap-2">
+                    <TeamBilingualName :name="row.teamName" variant="table" />
+                    <span v-if="row.status === 'absent'" class="shrink-0 text-[10px] font-semibold text-amber-700 bg-amber-200/60 rounded-full px-1.5 py-0.5 mt-0.5">
                       {{ t('teams.absent') }}
                     </span>
-                  </span>
+                  </div>
                 </td>
                 <td
                   v-for="j in protocolData.judges"
@@ -379,7 +376,7 @@ onMounted(load)
             <thead class="bg-slate-50 text-slate-600 sticky top-0">
               <tr>
                 <th rowspan="2" class="px-3 py-2 text-left font-semibold border border-slate-200 w-12">#</th>
-                <th rowspan="2" class="px-3 py-2 text-left font-semibold border border-slate-200 min-w-[220px]">
+                <th rowspan="2" class="px-3 py-2 text-left font-semibold border border-slate-200 min-w-[220px] max-w-[min(520px,45vw)]">
                   {{ t('protocol.team') }}
                 </th>
                 <th colspan="5" class="px-3 py-2 text-center font-semibold border border-slate-200 bg-slate-700/5 text-slate-700">
@@ -405,13 +402,13 @@ onMounted(load)
                 :class="row.status === 'absent' ? 'bg-[#FFF4B8]/60' : (i % 2 === 1 ? 'bg-slate-50/40' : '')"
               >
                 <td class="px-3 py-2 text-slate-400 font-mono text-xs border border-slate-200">{{ i + 1 }}</td>
-                <td class="px-3 py-2 font-semibold text-slate-800 border border-slate-200">
-                  <span class="inline-flex items-center gap-2">
-                    {{ row.teamName }}
-                    <span v-if="row.status === 'absent'" class="text-[10px] font-semibold text-amber-700 bg-amber-200/60 rounded-full px-1.5 py-0.5">
+                <td class="px-3 py-2 text-slate-800 border border-slate-200 max-w-[min(520px,45vw)] align-top" :title="row.teamName">
+                  <div class="flex items-start gap-2">
+                    <TeamBilingualName :name="row.teamName" variant="table" />
+                    <span v-if="row.status === 'absent'" class="shrink-0 text-[10px] font-semibold text-amber-700 bg-amber-200/60 rounded-full px-1.5 py-0.5 mt-0.5">
                       {{ t('teams.absent') }}
                     </span>
-                  </span>
+                  </div>
                 </td>
                 <td class="px-3 py-2 text-center border border-slate-200 tabular-nums"
                   :class="row.total === 0 ? 'text-slate-300' : ''"

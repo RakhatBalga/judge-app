@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"database/sql"
@@ -22,11 +22,6 @@ const maxPerCriterion = 20
 
 func (a *App) UpsertScore(c *gin.Context) {
 	u := currentUser(c)
-	if u.Role != "judge" && u.Role != "admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "only judges can score"})
-		return
-	}
-	// admin can also score if present, but typically judge only.
 	if u.Role != "judge" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "only judges submit scores"})
 		return

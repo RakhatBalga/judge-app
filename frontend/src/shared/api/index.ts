@@ -6,6 +6,8 @@ export {
   fetchProtocol,
   fetchJudgeScores,
   fetchLogs,
+  type FetchLogsParams,
+  type FetchLogsResult,
   type ProtocolRow,
   type ProtocolJudge,
   type ProtocolResponse,

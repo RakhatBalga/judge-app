@@ -102,14 +102,14 @@ const statusColorClass = computed(() => {
       class="bg-white rounded-2xl shadow-sm p-4"
     >
       <div class="flex items-start justify-between gap-3">
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-0.5">
             <span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#28ca9e]/10 text-[#28ca9e] text-xs font-bold shrink-0">
               {{ c.index }}
             </span>
             <span class="text-sm font-semibold text-slate-800">{{ c.label }}</span>
           </div>
-          <p class="text-xs text-slate-400 ml-7">{{ c.description }}</p>
+          <p class="text-xs text-slate-400 ml-7 leading-snug">{{ c.description }}</p>
         </div>
 
         <div class="shrink-0 flex flex-col items-end gap-1">
@@ -118,9 +118,10 @@ const statusColorClass = computed(() => {
               type="button"
               tabindex="-1"
               @click="decrement(c.key)"
-              class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 flex items-center justify-center text-slate-500 transition"
+              aria-label="−1"
+              class="w-10 h-10 sm:w-8 sm:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 flex items-center justify-center text-slate-500 transition"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
               </svg>
             </button>
@@ -132,12 +133,15 @@ const statusColorClass = computed(() => {
               @blur="onBlur(c.key)"
               @keydown="evt => onKeydown(evt, c.key)"
               type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              enterkeyhint="next"
               min="0"
               :max="MAX_SCORE_PER_CRITERIA"
               placeholder="—"
               :data-criterion="c.key"
               :class="[
-                'w-14 text-center py-1.5 rounded-lg border text-sm font-semibold transition focus:outline-none focus:ring-2',
+                'w-16 sm:w-14 text-center py-2 sm:py-1.5 rounded-lg border text-base sm:text-sm font-semibold transition focus:outline-none focus:ring-2',
                 fieldError(c.key)
                   ? 'border-red-300 bg-red-50 text-red-700 focus:ring-red-300'
                   : values[c.key] !== ''
@@ -150,9 +154,10 @@ const statusColorClass = computed(() => {
               type="button"
               tabindex="-1"
               @click="increment(c.key)"
-              class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 flex items-center justify-center text-slate-500 transition"
+              aria-label="+1"
+              class="w-10 h-10 sm:w-8 sm:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 flex items-center justify-center text-slate-500 transition"
             >
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
               </svg>
             </button>
@@ -171,7 +176,7 @@ const statusColorClass = computed(() => {
           tabindex="-1"
           @click="setQuickValue(c.key, q)"
           :class="[
-            'px-2.5 py-1 rounded-lg text-xs font-semibold transition border',
+            'min-w-[44px] sm:min-w-0 px-3 sm:px-2.5 py-1.5 sm:py-1 rounded-lg text-sm sm:text-xs font-semibold transition border',
             Number(values[c.key]) === q
               ? 'bg-[#28ca9e] text-white border-[#28ca9e]'
               : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100',
@@ -239,7 +244,7 @@ const statusColorClass = computed(() => {
       <p v-if="hasErrors" class="text-center text-xs text-red-400 mt-2">
         {{ t('scoring.fixErrors') }}
       </p>
-      <p class="text-center text-[11px] text-slate-300 mt-2">{{ t('scoring.keyboardHint') }}</p>
+      <p class="hidden sm:block text-center text-[11px] text-slate-300 mt-2">{{ t('scoring.keyboardHint') }}</p>
     </div>
   </div>
 </template>

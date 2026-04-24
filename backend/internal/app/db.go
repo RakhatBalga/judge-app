@@ -1,12 +1,14 @@
-package main
+package app
 
 import (
 	"database/sql"
-	"errors"
+	"encoding/json"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
+
+	"judgeapp/backend/data"
 )
 
 type App struct {
@@ -89,29 +91,6 @@ var seedUsers = []seedUser{
 	{"judge5", "judge5pass", "Судья Смирнов С. С.", "judge"},
 }
 
-var seedTeams = []string{
-	"алабуга", "Көкмұрын бөлімі", "Alpha Innovators", "Beta Builders", "Gamma Coders", "Delta Designers",
-	"Epsilon Engineers", "Zeta Hackers", "Eta Creators", "Theta Makers",
-	"Iota Pioneers", "Kappa Solvers", "Lambda Thinkers", "Mu Dreamers",
-	"Nu Visionaries", "Xi Inventors", "Omicron Crafters", "Pi Architects",
-	"Rho Explorers", "Sigma Legends", "Tau Phoenixes", "Upsilon Wolves",
-	"Phi Eagles", "Chi Hawks", "Psi Lions", "Omega Panthers",
-	"Apex Squad", "Blaze Team", "Cyan Force", "Dawn Riders",
-	"Echo Unit", "Flux Collective", "Ghost Protocol", "Helix Group",
-	"Iron Forge", "Jade Circuit", "Kinetic Wave", "Lumina Crew",
-	"Matrix Core", "Nebula Team", "Orbit Station", "Pulse Squad",
-	"Quantum Leap", "Rapid Fire", "Solar Wind", "Titan Force",
-	"Ultra Boost", "Vertex Team", "Warp Speed", "X-Factor",
-	"Yield Point", "Zenith Crew", "Aero Dynamics", "Bolt Strike",
-	"Crystal Clear", "Deep Space", "Electro Surge", "Fusion Lab",
-	"Grid Power", "Hyper Drive", "Impact Zone", "Junction Box",
-	"Keystone Crew", "Logic Gate", "Micro Sprint", "Nano Tech",
-	"Open Source", "Pixel Perfect", "Quick Sort", "Runtime Error",
-	"Stack Overflow", "Type Script", "Unit Test", "Vector Field",
-	"Web Craft", "XOR Squad", "Yellow Brick", "Zero Bug",
-	"Agile Spark", "Binary Stars", "Code Ninjas", "Data Wave",
-}
-
 func Seed(db *sql.DB) error {
 	var userCount int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM users`).Scan(&userCount); err != nil {
@@ -140,19 +119,21 @@ func Seed(db *sql.DB) error {
 		return err
 	}
 	if teamCount == 0 {
+		var names []string
+		if err := json.Unmarshal(data.ExhibitionProjectsJSON, &names); err != nil {
+			return err
+		}
 		stmt, err := db.Prepare(`INSERT INTO teams(name) VALUES(?)`)
 		if err != nil {
 			return err
 		}
 		defer stmt.Close()
-		for _, n := range seedTeams {
+		for _, n := range names {
 			if _, err := stmt.Exec(n); err != nil {
 				return err
 			}
 		}
-		log.Printf("seeded %d teams", len(seedTeams))
+		log.Printf("seeded %d teams", len(names))
 	}
 	return nil
 }
-
-var errNotFound = errors.New("not found")

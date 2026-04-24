@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"database/sql"
@@ -8,10 +8,10 @@ import (
 )
 
 type teamDTO struct {
-	ID          int64    `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Status      string   `json:"status"`
+	ID          int64     `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
 	MyScore     *scoreDTO `json:"myScore,omitempty"`
 }
 

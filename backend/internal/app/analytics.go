@@ -1,30 +1,31 @@
-package main
+package app
 
 import (
 	"database/sql"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 type protocolRow struct {
-	TeamID       int64    `json:"teamId"`
-	TeamName     string   `json:"teamName"`
-	Status       string   `json:"status"`
-	AvgC1        *float64 `json:"avgC1"`
-	AvgC2        *float64 `json:"avgC2"`
-	AvgC3        *float64 `json:"avgC3"`
-	AvgC4        *float64 `json:"avgC4"`
-	AvgC5        *float64 `json:"avgC5"`
-	AvgTotal     *float64 `json:"avgTotal"`
-	JudgesVoted  int      `json:"judgesVoted"`
+	TeamID      int64    `json:"teamId"`
+	TeamName    string   `json:"teamName"`
+	Status      string   `json:"status"`
+	AvgC1       *float64 `json:"avgC1"`
+	AvgC2       *float64 `json:"avgC2"`
+	AvgC3       *float64 `json:"avgC3"`
+	AvgC4       *float64 `json:"avgC4"`
+	AvgC5       *float64 `json:"avgC5"`
+	AvgTotal    *float64 `json:"avgTotal"`
+	JudgesVoted int      `json:"judgesVoted"`
 }
 
 type protocolResponse struct {
-	Rows       []protocolRow `json:"rows"`
-	Judges     []judgeSummary `json:"judges"`
-	TotalJudges int          `json:"totalJudges"`
+	Rows        []protocolRow  `json:"rows"`
+	Judges      []judgeSummary `json:"judges"`
+	TotalJudges int            `json:"totalJudges"`
 }
 
 type judgeSummary struct {
@@ -99,16 +100,16 @@ func nullFloat(n sql.NullFloat64) *float64 {
 }
 
 type auditLogDTO struct {
-	ID        int64   `json:"id"`
-	Timestamp string  `json:"timestamp"`
-	UserID    int64   `json:"userId"`
-	Username  string  `json:"username"`
-	FullName  string  `json:"fullName"`
-	TeamID    int64   `json:"teamId"`
-	TeamName  string  `json:"teamName"`
-	Field     string  `json:"field"`
-	OldValue  *int    `json:"oldValue"`
-	NewValue  int     `json:"newValue"`
+	ID        int64  `json:"id"`
+	Timestamp string `json:"timestamp"`
+	UserID    int64  `json:"userId"`
+	Username  string `json:"username"`
+	FullName  string `json:"fullName"`
+	TeamID    int64  `json:"teamId"`
+	TeamName  string `json:"teamName"`
+	Field     string `json:"field"`
+	OldValue  *int   `json:"oldValue"`
+	NewValue  int    `json:"newValue"`
 }
 
 type judgeScoreRow struct {
@@ -124,7 +125,7 @@ type judgeScoreRow struct {
 }
 
 type judgeScoresEntry struct {
-	Judge  judgeSummary     `json:"judge"`
+	Judge  judgeSummary    `json:"judge"`
 	Scores []judgeScoreRow `json:"scores"`
 }
 
@@ -186,15 +187,57 @@ func (a *App) AnalyticsLogs(c *gin.Context) {
 		}
 	}
 
-	rows, err := a.DB.Query(`
+	from := strings.TrimSpace(c.Query("from"))
+	to := strings.TrimSpace(c.Query("to"))
+
+	var filterUserID int64
+	if q := strings.TrimSpace(c.Query("userId")); q != "" {
+		if id, err := strconv.ParseInt(q, 10, 64); err == nil && id > 0 {
+			filterUserID = id
+		}
+	}
+
+	jRows, err := a.DB.Query(`SELECT id, username, full_name FROM users WHERE role='judge' ORDER BY id`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	judges := make([]judgeSummary, 0, 16)
+	for jRows.Next() {
+		var j judgeSummary
+		if err := jRows.Scan(&j.ID, &j.Username, &j.FullName); err != nil {
+			jRows.Close()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		judges = append(judges, j)
+	}
+	jRows.Close()
+
+	q := `
 		SELECT l.id, l.timestamp, l.user_id, u.username, u.full_name,
 		       l.team_id, t.name, l.field, l.old_value, l.new_value
 		FROM audit_logs l
 		JOIN users u ON u.id = l.user_id
 		JOIN teams t ON t.id = l.team_id
-		ORDER BY l.id DESC
-		LIMIT ?
-	`, limit)
+		WHERE 1=1`
+	args := make([]interface{}, 0, 6)
+	if from != "" {
+		q += ` AND l.timestamp >= ?`
+		args = append(args, from)
+	}
+	if to != "" {
+		q += ` AND l.timestamp <= ?`
+		args = append(args, to)
+	}
+	if filterUserID > 0 {
+		q += ` AND l.user_id = ?`
+		args = append(args, filterUserID)
+	}
+	q += ` ORDER BY l.id DESC LIMIT ?`
+	args = append(args, limit)
+
+	rows, err := a.DB.Query(q, args...)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -216,5 +259,5 @@ func (a *App) AnalyticsLogs(c *gin.Context) {
 		}
 		out = append(out, l)
 	}
-	c.JSON(http.StatusOK, gin.H{"logs": out})
+	c.JSON(http.StatusOK, gin.H{"logs": out, "judges": judges})
 }

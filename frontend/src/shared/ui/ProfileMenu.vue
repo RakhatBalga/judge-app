@@ -46,9 +46,10 @@ function goTo(name: string) {
     <!-- Profile badge button -->
     <button
       @click="isMenuOpen = !isMenuOpen"
+      aria-label="Profile menu"
       class="flex items-center gap-2.5 bg-slate-50 hover:bg-slate-100 rounded-full pl-3 pr-1 py-1 transition"
     >
-      <span class="text-xs font-bold text-slate-600 max-w-[140px] truncate">
+      <span class="hidden sm:inline text-xs font-bold text-slate-600 max-w-[140px] truncate">
         {{ auth.user?.fullName || `${t('scoring.judge')} ${auth.user?.id ?? ''}` }}
       </span>
       <img :src="judgeImg" alt="Judge" class="w-11 h-11 rounded-full border-2 border-white object-cover shadow-md" />
@@ -87,6 +88,7 @@ function goTo(name: string) {
         <!-- Navigation links -->
         <div v-if="auth.isAuthenticated" class="px-3 py-2 border-b border-slate-200 space-y-1">
           <button
+            v-if="auth.isJudge"
             @click="goTo('teams')"
             class="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-50 transition flex items-center gap-2"
           >

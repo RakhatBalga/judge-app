@@ -20,7 +20,7 @@
     "logs": "Журнал действий"
   },
   "app": {
-    "title": "AJA",
+    "title": "Artisan Judge",
     "description": "Система судейства соревнований"
   },
   "auth": {
@@ -80,7 +80,7 @@
   "protocol": {
     "title": "Сводный протокол",
     "subtitle": "Средние баллы жюри по всем командам",
-    "team": "Команда",
+    "team": "Проект",
     "criteria": "Критерии",
     "total": "Итого",
     "judges": "Судей",
@@ -115,13 +115,23 @@
     "title": "Журнал действий судей",
     "subtitle": "Полный аудит изменений оценок",
     "filterJudge": "Судья",
-    "filterTeam": "Команда",
-    "filterTeamPlaceholder": "Название команды…",
+    "filterTeam": "Проект",
+    "filterTeamPlaceholder": "Название проекта…",
     "allJudges": "Все судьи",
     "refresh": "Обновить",
     "noLogs": "Нет записей",
     "actionSet": "выставил(а)",
     "actionChanged": "изменил(а)",
-    "forProject": "у команды"
+    "forProject": "для проекта",
+    "exportExcel": "Выгрузить в Excel",
+    "exporting": "Выгрузка…",
+    "colId": "№",
+    "colTimestamp": "Время (UTC)",
+    "colJudge": "Судья",
+    "colUsername": "Логин",
+    "colProject": "Проект",
+    "colCriterion": "Критерий",
+    "colOld": "Было",
+    "colNew": "Стало"
   }
 }

@@ -65,7 +65,32 @@ export async function fetchJudgeScores(): Promise<JudgeScoresEntry[]> {
   return data.judges
 }
 
-export async function fetchLogs(limit = 500): Promise<AuditLog[]> {
-  const { data } = await http.get<{ logs: AuditLog[] }>('/analytics/logs', { params: { limit } })
-  return data.logs
+export interface FetchLogsParams {
+  limit?: number
+  from?: string
+  to?: string
+  /** When set, only this judge's rows are returned (applied in SQL before LIMIT). */
+  userId?: number
+}
+
+export interface FetchLogsResult {
+  logs: AuditLog[]
+  judges: ProtocolJudge[]
+}
+
+export async function fetchLogs(params: FetchLogsParams | number = {}): Promise<FetchLogsResult> {
+  const p: FetchLogsParams = typeof params === 'number' ? { limit: params } : params
+  const { limit = 500, from, to, userId } = p
+  const { data } = await http.get<FetchLogsResult>('/analytics/logs', {
+    params: {
+      limit,
+      ...(from ? { from } : {}),
+      ...(to ? { to } : {}),
+      ...(userId != null && userId > 0 ? { userId } : {}),
+    },
+  })
+  return {
+    logs: data.logs,
+    judges: data.judges ?? [],
+  }
 }

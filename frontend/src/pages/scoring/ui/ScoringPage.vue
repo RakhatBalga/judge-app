@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@features/auth'
 import { ScoreForm } from '@features/score-team'
 import { useTeamsStore } from '@entities/team'
-import { StatusBadge } from '@shared/ui'
+import { StatusBadge, TeamBilingualName } from '@shared/ui'
 import { useI18n } from '@shared/i18n/useI18n'
 
 const props = defineProps<{ teamId: number }>()
@@ -14,6 +14,10 @@ const teamsStore = useTeamsStore()
 const { t } = useI18n()
 
 onMounted(() => {
+  if (auth.isAdmin) {
+    void router.replace({ name: 'admin-protocol' })
+    return
+  }
   void teamsStore.load()
 })
 
@@ -34,7 +38,7 @@ function goNext() {
 
 <template>
   <div class="min-h-screen bg-[#F8FAFB] flex flex-col max-w-2xl mx-auto">
-    <header class="bg-white border-b border-slate-200 px-4 pb-4 sticky top-0 z-10 pt-4">
+    <header class="bg-white border-b border-slate-200 px-4 pb-4 sticky top-0 z-10 pt-safe">
       <div class="flex items-center gap-3">
         <button
           @click="router.push({ name: 'teams' })"
@@ -46,9 +50,12 @@ function goNext() {
         </button>
 
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 font-mono shrink-0">#{{ teamId }}</span>
-            <h1 class="text-base font-bold text-slate-800 truncate">{{ team?.name || '…' }}</h1>
+          <div class="flex items-start gap-2">
+            <span class="text-xs text-slate-400 font-mono shrink-0 mt-0.5">#{{ teamId }}</span>
+            <h1 class="min-w-0" :title="team?.name || ''">
+              <TeamBilingualName v-if="team" :name="team.name" variant="title" />
+              <span v-else class="text-base font-bold text-slate-800">…</span>
+            </h1>
           </div>
           <p class="text-xs text-slate-400">{{ auth.user?.fullName || t('scoring.judge') }}</p>
         </div>
@@ -81,7 +88,7 @@ function goNext() {
       </div>
     </header>
 
-    <main class="flex-1 px-4 py-4 pb-6">
+    <main class="flex-1 px-4 py-4 pb-safe">
       <ScoreForm v-if="team" :team-id="teamId" :judge-id="auth.user?.id" />
       <div v-else class="flex items-center justify-center py-20 text-slate-400 text-sm">
         {{ t('common.loading') }}

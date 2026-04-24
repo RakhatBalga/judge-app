@@ -20,7 +20,7 @@
     "logs": "Әрекеттер журналы"
   },
   "app": {
-    "title": "AJA",
+    "title": "Artisan Judge",
     "description": "Жарыстарды судьялау жүйесі"
   },
   "auth": {
@@ -80,7 +80,7 @@
   "protocol": {
     "title": "Жиынтық хаттама",
     "subtitle": "Барлық топтар бойынша судьялардың орташа ұпайлары",
-    "team": "Топ",
+    "team": "Жоба",
     "criteria": "Критерийлер",
     "total": "Барлығы",
     "judges": "Судьялар",
@@ -115,13 +115,23 @@
     "title": "Судьялар журналы",
     "subtitle": "Ұпай өзгерістерінің толық аудиті",
     "filterJudge": "Судья",
-    "filterTeam": "Топ",
-    "filterTeamPlaceholder": "Топ атауы…",
+    "filterTeam": "Жоба",
+    "filterTeamPlaceholder": "Жоба атауы…",
     "allJudges": "Барлық судьялар",
     "refresh": "Жаңарту",
     "noLogs": "Жазбалар жоқ",
     "actionSet": "қойды",
     "actionChanged": "өзгертті",
-    "forProject": "топ үшін"
+    "forProject": "жоба үшін",
+    "exportExcel": "Excel-ге шығару",
+    "exporting": "Шығару…",
+    "colId": "№",
+    "colTimestamp": "Уақыт (UTC)",
+    "colJudge": "Судья",
+    "colUsername": "Логин",
+    "colProject": "Жоба",
+    "colCriterion": "Критерий",
+    "colOld": "Бұрынғы",
+    "colNew": "Жаңа"
   }
 }

@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import type { ProtocolResponse, JudgeScoresEntry, JudgeScoreRow } from '@shared/api'
+import { formatTeamForSpreadsheet } from '@shared/utils/team-bilingual-name'
 
 export type AwardKey = 'grandPrix' | 'first' | 'second' | 'third'
 
@@ -79,7 +80,7 @@ const THIN_BORDER = {
   bottom: { style: 'thin' as const }, right: { style: 'thin' as const },
 }
 const COL_WIDTHS_JUDGE = [
-  { width: 5 }, { width: 32 },
+  { width: 5 }, { width: 42 },
   { width: 16 }, { width: 16 }, { width: 16 }, { width: 22 }, { width: 16 },
   { width: 14 }, { width: 16 },
 ]
@@ -216,12 +217,17 @@ function buildSummarySheet(wb: ExcelJS.Workbook, data: ProtocolResponse, judgeSc
   summary.forEach((r, i) => {
     const row = ws.getRow(startRow + i)
     const awardText = r.award ? awardLabels[r.award] : ''
-    const values: (string | number)[] = [i + 1, r.teamName]
+    const displayName = formatTeamForSpreadsheet(r.teamName)
+    const values: (string | number)[] = [i + 1, displayName]
     for (const j of judges) values.push(r.byJudge[j.id] ?? 0)
     values.push(r.grandTotal)
     values.push(fmtPlace(r.place) as string | number)
     values.push(awardText)
     row.values = values
+    // Give wrapped project names enough vertical room (≈ 2 lines at col width 34).
+    const nameLen = displayName.length
+    if (displayName.includes('\n')) row.height = Math.min(72, 36 + Math.ceil(nameLen / 40) * 12)
+    else if (nameLen > 34) row.height = Math.min(60, 18 + Math.ceil(nameLen / 34) * 14)
     const isAbsent = r.status === 'absent'
     row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
       cell.border = THIN_BORDER
@@ -315,7 +321,7 @@ function buildJudgeSheet(
 
   const H1 = 4, H2 = 5
 
-  ws.getRow(H1).values = ['№', 'Команда', 'Критерии', null, null, null, null, 'Итого', 'Статус']
+  ws.getRow(H1).values = ['№', 'Наименование проекта', 'Критерии', null, null, null, null, 'Итого', 'Статус']
   ws.mergeCells(H1, 3, H1, 7)
   ws.mergeCells(H1, 1, H2, 1)
   ws.mergeCells(H1, 2, H2, 2)
@@ -329,8 +335,9 @@ function buildJudgeSheet(
   entry.scores.forEach((r: JudgeScoreRow, i: number) => {
     const row = ws.getRow(startRow + i)
     const hasScore = r.total > 0
+    const displayName = formatTeamForSpreadsheet(r.teamName)
     row.values = [
-      i + 1, r.teamName,
+      i + 1, displayName,
       hasScore ? r.c1 : '—',
       hasScore ? r.c2 : '—',
       hasScore ? r.c3 : '—',
@@ -339,6 +346,9 @@ function buildJudgeSheet(
       hasScore ? r.total : 0,
       r.status === 'absent' ? 'Не участвует' : 'Участвует',
     ]
+    const nameLen = displayName.length
+    if (displayName.includes('\n')) row.height = Math.min(72, 36 + Math.ceil(nameLen / 42) * 12)
+    else if (nameLen > 42) row.height = Math.min(60, 18 + Math.ceil(nameLen / 42) * 14)
     const isAbsent = r.status === 'absent'
     row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
       cell.border = THIN_BORDER
@@ -363,7 +373,7 @@ export async function exportProtocolToXlsx(
   opts: ExportOptions = {},
 ): Promise<void> {
   const wb = new ExcelJS.Workbook()
-  wb.creator = 'AJA Judging System'
+  wb.creator = 'Artisan Judge'
   wb.created = new Date()
 
   const criteriaLabels = opts.criteriaLabels ?? DEFAULT_CRITERIA_LABELS

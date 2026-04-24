@@ -21,12 +21,8 @@ export function useFilterTeams() {
       return filterMode.value === 'scored' ? has : !has
     })
 
-    return [...filtered].sort((a, b) => {
-      const scoreA = a.myScore?.total ?? -1
-      const scoreB = b.myScore?.total ?? -1
-      if (scoreA !== scoreB) return scoreB - scoreA
-      return a.id - b.id
-    })
+    // Список всегда в порядке id (как в протоколе), без сортировки по баллам.
+    return [...filtered].sort((a, b) => a.id - b.id)
   })
 
   return { search, filterMode, filteredTeams, scoredCount, totalCount }

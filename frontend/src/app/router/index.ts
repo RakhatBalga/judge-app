@@ -15,14 +15,14 @@ const router = createRouter({
       path: '/teams',
       name: 'teams',
       component: () => import('@pages/teams/ui/TeamsPage.vue'),
-      meta: { roles: ['judge', 'admin'] },
+      meta: { roles: ['judge'] },
     },
     {
       path: '/score/:teamId',
       name: 'score',
       component: () => import('@pages/scoring/ui/ScoringPage.vue'),
       props: route => ({ teamId: Number(route.params.teamId) }),
-      meta: { roles: ['judge', 'admin'] },
+      meta: { roles: ['judge'] },
     },
     {
       path: '/admin/protocol',

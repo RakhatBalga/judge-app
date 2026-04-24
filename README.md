@@ -7,6 +7,15 @@
 > - `backend/` — REST API на Go (порт `:8080`)
 > - `frontend/` — SPA на Vue 3 (порт `:5173` в dev-режиме)
 
+**Онбординг для ревью (первые файлы):**
+
+| Роль | Точка входа | Дальше по смыслу |
+|------|-------------|------------------|
+| Backend | `backend/cmd/server/main.go` | `internal/app/routes.go` (маршруты), `db.go` (схема + seed), хендлеры по областям: `auth.go`, `teams.go`, `scores.go`, `analytics.go` |
+| Frontend | `frontend/src/app/main.ts` | `app/router/index.ts` (роли), затем `pages/*/ui/*` и `shared/api/*.api.ts` |
+
+Полная схема папок — в [структуре проекта](#структура-проекта) и [FSD](#feature-sliced-design).
+
 ---
 
 ## Содержание
@@ -111,7 +120,7 @@ cd backend && go mod download && cd ..
 
 ```bash
 cd backend
-go run .
+go run ./cmd/server
 # → judge backend listening on :8080 (db=judge.db)
 ```
 
@@ -137,7 +146,7 @@ VITE_API_URL=http://192.168.1.42:8080
 
 ```bash
 # Терминал 1
-cd backend && go run .
+cd backend && go run ./cmd/server
 
 # Терминал 2
 cd frontend && npm run dev
@@ -147,7 +156,7 @@ cd frontend && npm run dev
 
 ## Учётные данные
 
-Данные создаются функцией `Seed` в `backend/db.go` при пустой базе.
+Данные создаются функцией `Seed` в `backend/internal/app/db.go` при пустой базе.
 
 ### Администратор
 
@@ -165,7 +174,7 @@ cd frontend && npm run dev
 | `judge4` | `judge4pass` | Судья Кузнецов К. К. | `/teams` |
 | `judge5` | `judge5pass` | Судья Смирнов С. С. | `/teams` |
 
-> Перед ивентом: либо поменяй `seedUsers` в `backend/db.go` и пересоздай БД (`rm backend/judge.db`), либо сделай миграцию вручную через `sqlite3 backend/judge.db`.
+> Перед ивентом: либо поменяй `seedUsers` в `backend/internal/app/db.go` и пересоздай БД (`rm backend/judge.db`), либо сделай миграцию вручную через `sqlite3 backend/judge.db`.
 
 ---
 
@@ -175,7 +184,7 @@ cd frontend && npm run dev
 
 ```bash
 # Backend на всех интерфейсах:
-cd backend && ADDR=":8080" go run .
+cd backend && ADDR=":8080" go run ./cmd/server
 
 # Frontend с --host и нужным API-url:
 cd frontend && VITE_API_URL=http://192.168.1.42:8080 npm run dev -- --host
@@ -232,17 +241,29 @@ cloudflared tunnel --url http://localhost:5173
 
 ## Структура проекта
 
+**Ориентир для ревью:** бэкенд — классическая раскладка Go (`cmd/` = бинарники, `internal/` = код приложения, не для внешнего импорта). Фронтенд — [Feature-Sliced Design](https://feature-sliced.design/): `app` → `pages` → `features` / `entities` → `shared` (см. раздел [Feature-Sliced Design](#feature-sliced-design)).
+
 ```
 judgeApp/
 ├── backend/                            # Go REST API
-│   ├── main.go                         # Роутинг, CORS, группы middleware
-│   ├── db.go                           # InitDB + Seed (users, teams)
-│   ├── auth.go                         # /auth/login, JWT, RequireAuth/RequireRole
-│   ├── teams.go                        # GET /teams (+ myScore для судьи)
-│   ├── scores.go                       # POST /scores (UPSERT + audit_logs)
-│   ├── analytics.go                    # /analytics/protocol, /analytics/logs
+│   ├── cmd/
+│   │   ├── server/                     # Точка входа HTTP
+│   │   │   └── main.go                 # init DB, seed, запуск Gin
+│   │   └── sync-teams/                 # Утилита: имена из JSON в SQLite
+│   │       └── main.go
+│   ├── internal/app/                   # прикладной слой: HTTP + БД
+│   │   ├── db.go                       # InitDB, schema DDL, Seed
+│   │   ├── routes.go                  # CORS, группы, маршруты
+│   │   ├── middleware.go              # CORS
+│   │   ├── auth.go                    # /auth, JWT, middleware ролей
+│   │   ├── teams.go                   # GET /teams (+ myScore)
+│   │   ├── scores.go                  # POST /scores, audit
+│   │   └── analytics.go               # /analytics/* (протокол, логи, …)
+│   ├── data/                          # сид имён команд (exhibition_projects.json, embed)
+│   │   ├── embed.go
+│   │   └── exhibition_projects.json
 │   ├── go.mod / go.sum
-│   └── judge.db                        # SQLite (создаётся автоматически)
+│   └── judge.db                      # SQLite (создаётся при старте, в .gitignore)
 │
 ├── frontend/                           # Vue 3 SPA
 │   ├── src/
@@ -303,7 +324,7 @@ judgeApp/
 
 ## Схема базы данных
 
-SQLite создаётся при старте бэкенда. Все DDL в `backend/db.go`.
+SQLite создаётся при старте бэкенда. Все DDL в `backend/internal/app/db.go`.
 
 ### `users`
 | Поле | Тип | Комментарий |
@@ -421,6 +442,10 @@ SQLite создаётся при старте бэкенда. Все DDL в `bac
 ### `GET /analytics/logs?limit=500`  *(только `admin`)*
 Лента изменений в обратном хронологическом порядке, с именами судьи и команды. По умолчанию возвращает 500 последних записей, максимум 5000.
 
+- Опционально: `userId` — только записи выбранного судьи (**фильтр в SQL до `LIMIT`**).
+- Опционально: `from`, `to` (RFC3339) — границы по `audit_logs.timestamp` (для внешних вызовов; в веб-UI не используется).
+- В ответе: `logs` и `judges` (все с ролью `judge`) — для селектора.
+
 ### Коды ответов
 
 | Код | Когда |
@@ -476,6 +501,8 @@ import { loginRequest, fetchTeams, upsertScoreRequest, fetchProtocol, fetchLogs 
 ```
 app  →  pages  →  features  →  entities  →  shared
 ```
+
+**Соглашение по папкам:** у `pages/`, `features/`, `entities/` есть корневой `index.ts` (реэкспорт публичного API слайса). Внутри — `ui/` (Vue-компоненты) и/или `model/` (логика, composables, Pinia), чтобы отделить отображение от данных.
 
 ### Алиасы
 
@@ -642,11 +669,11 @@ CGO_ENABLED=1 go build -o judge-server .
 
 ### Как сбросить состояние и начать с чистой БД?
 ```bash
-cd backend && rm -f judge.db judge.db-shm judge.db-wal && go run .
+cd backend && rm -f judge.db judge.db-shm judge.db-wal && go run ./cmd/server
 ```
 
 ### Как добавить ещё одного судью / администратора?
-Отредактируй `seedUsers` в `backend/db.go` и удали файл БД. Или живьём:
+Отредактируй `seedUsers` в `backend/internal/app/db.go` и удали файл БД. Или живьём:
 ```bash
 sqlite3 backend/judge.db
 # вставь пользователя, pass нужно предварительно bcrypt-хешнуть
@@ -660,7 +687,7 @@ UPDATE teams SET status = 'absent' WHERE id = 42;
 На фронте она автоматически получит жёлтую подсветку в списке и в протоколе, и в экспортируемом XLSX.
 
 ### Где менять количество критериев и максимальный балл?
-`src/shared/config/scoring.ts` (фронт) и константа `maxPerCriterion` в `backend/scores.go` (бэк). При изменении количества критериев нужно ещё поправить DDL в `backend/db.go` и DTO.
+`src/shared/config/scoring.ts` (фронт) и константа `maxPerCriterion` в `backend/internal/app/scores.go` (бэк). При изменении количества критериев нужно ещё поправить DDL в `backend/internal/app/db.go` и DTO.
 
 ### Почему у роутера `createWebHashHistory`?
 Чтобы SPA работала как статический билд без настройки fallback-роутов на сервере.
@@ -673,8 +700,8 @@ UPDATE teams SET status = 'absent' WHERE id = 42;
 
 ### Как быстро убедиться, что документация не отстала от кода?
 Минимальный чек:
-1. `backend/db.go` — актуальны ли seed-пользователи и DDL
-2. `backend/main.go` — актуален ли список роутов
+1. `backend/internal/app/db.go` — актуальны ли seed-пользователи и DDL
+2. `backend/internal/app/routes.go` — актуален ли список роутов
 3. `frontend/src/app/router/index.ts` — актуальны ли маршруты и `meta.roles`
 4. `frontend/src/shared/api/*.api.ts` — актуальны ли типы ответов и пути
 

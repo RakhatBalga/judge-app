@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@features/auth'
 import { useFilterTeams, FilterBar } from '@features/filter-teams'
 import { TeamCard, useTeamsStore } from '@entities/team'
 import { ProgressBar, ProfileMenu } from '@shared/ui'
@@ -8,19 +9,24 @@ import { useI18n } from '@shared/i18n/useI18n'
 import logoImg from '@shared/assets/logo.png'
 
 const router = useRouter()
+const auth = useAuthStore()
 const teamsStore = useTeamsStore()
 const { t } = useI18n()
 
 const { search, filterMode, filteredTeams, scoredCount, totalCount } = useFilterTeams()
 
 onMounted(() => {
+  if (auth.isAdmin) {
+    void router.replace({ name: 'admin-protocol' })
+    return
+  }
   void teamsStore.load()
 })
 </script>
 
 <template>
   <div class="min-h-screen bg-[#F8FAFB] flex flex-col max-w-2xl mx-auto">
-    <header class="bg-white border-b border-slate-200 px-4 pb-4 sticky top-0 z-10 pt-4">
+    <header class="bg-white border-b border-slate-200 px-4 pb-4 sticky top-0 z-10 pt-safe">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2.5">
           <img :src="logoImg" alt="Logo" class="w-8 h-8 rounded-lg object-contain" />
@@ -44,7 +50,7 @@ onMounted(() => {
       </div>
     </header>
 
-    <main class="flex-1 px-4 py-3 pb-6">
+    <main class="flex-1 px-4 py-3 pb-safe">
       <div v-if="teamsStore.loading && totalCount === 0" class="flex items-center justify-center py-20 text-slate-400">
         <svg class="w-5 h-5 animate-spin mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

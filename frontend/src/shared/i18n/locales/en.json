@@ -20,7 +20,7 @@
     "logs": "Audit Log"
   },
   "app": {
-    "title": "AJA",
+    "title": "Artisan Judge",
     "description": "Judging system for competitions"
   },
   "auth": {
@@ -80,7 +80,7 @@
   "protocol": {
     "title": "Summary Protocol",
     "subtitle": "Average jury scores across all teams",
-    "team": "Team",
+    "team": "Project",
     "criteria": "Criteria",
     "total": "Total",
     "judges": "Judges",
@@ -115,13 +115,23 @@
     "title": "Judges' Audit Log",
     "subtitle": "Full audit of score changes",
     "filterJudge": "Judge",
-    "filterTeam": "Team",
-    "filterTeamPlaceholder": "Team name…",
+    "filterTeam": "Project",
+    "filterTeamPlaceholder": "Project name…",
     "allJudges": "All judges",
     "refresh": "Refresh",
     "noLogs": "No records",
     "actionSet": "set",
     "actionChanged": "changed",
-    "forProject": "for team"
+    "forProject": "for project",
+    "exportExcel": "Export to Excel",
+    "exporting": "Exporting…",
+    "colId": "ID",
+    "colTimestamp": "Time (UTC)",
+    "colJudge": "Judge",
+    "colUsername": "Username",
+    "colProject": "Project",
+    "colCriterion": "Criterion",
+    "colOld": "Old",
+    "colNew": "New"
   }
 }
